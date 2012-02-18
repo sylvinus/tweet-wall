@@ -25,42 +25,31 @@
     return list;
   }
   
-  var query = encodeURIComponent('techembassy OR "tech embassy" OR ideafoundry OR Tulip_time OR "Tulip Time" -pella -iowa');
-  
   $(function() {
     tweets = $('#tweets').scroller();
     flicks = $('#flickr').scroller();
     
+
     function fetchTweets() {
-      if(tweets.items.length < 15) {
-        // since_id
-        var url = 'http://search.twitter.com/search.json?q=' + query + '&rpp=30&callback=?'; 
-        $.getJSON(url, function(data) {
-          $.each(data.results, function() {  
-            tweets.push($('<li><img class="profile" src="' + this.profile_image_url + '"/><span class="from">' + this.from_user + ':</span> ' + inlinePics(this.text) + '</li>'))
-           }); 
-         });
+      if(tweets.items.length < 10) {
+        Joshfire.factory.getDataSource("text").find({},function(err,data) {
+          $.each(data.entries, function() {  
+            tweets.push($('<li><a href="'+this.author[0].url+'"><img class="profile" src="' + this.author[0].image.contentURL + '"/></a><span class="from">' + (this.author[0]["name"] || this.author[0]["foaf:nick"]) + ':</span> ' + inlinePics(this.name) + '</li>'));
+          }); 
+        });
+
       }
-      setTimeout(fetchTweets, 5000);
+      setTimeout(fetchTweets, 30000);
     }
     
-    jsonFlickrApi = function(data) {
-      $.each(data.photos.photo, function(i,photo){
-        //notice that "t.jpg" is where you change the
-        //size of the image
-        var t_url = "http://farm" + photo.farm + 
-        ".static.flickr.com/" + photo.server + "/" + 
-        photo.id + "_" + photo.secret + "_" + "m.jpg";
-
-        var p_url = "http://www.flickr.com/photos/" + 
-        photo.owner + "/" + photo.id;
-
-        flicks.push($('<li><a href="' + p_url + '"><img src="' + t_url + '"/></a></li>'));
-      });
-    }
     function fetchFlicks() {
       if (flicks.items.length < 15) {
-          $.getJSON("http://api.flickr.com/services/rest/?callback=?&format=json&method=flickr.photos.search&text=%22tulip%20time%22%20OR%20%22tech%20embassy%22&tag_mode=all&api_key=f9eed8709bd8c9663f988960cbdad53f&jsoncallback=jsonFlickrApi")
+        Joshfire.factory.getDataSource("image").find({},function(err,data) {
+          $.each(data.entries, function(i,photo){
+
+            flicks.push($('<li><a href="' + photo.url + '"><img src="' + photo.contentURL + '"/></a></li>'));
+          });
+        });
       }
       window.setTimeout(fetchFlicks, 120000);        
     }

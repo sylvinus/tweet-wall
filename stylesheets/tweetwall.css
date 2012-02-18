@@ -82,6 +82,7 @@ footer {
     
 #flickr-logo, #flickr img, .twitpic {
   border: 5px solid #fff;
+  width:250px;
 }
   footer a {
     color: #fff;
